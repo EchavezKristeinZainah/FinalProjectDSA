@@ -77,8 +77,8 @@
   <div class="nav-inner"><div class="brand"><span class="dot"></span><h1>Policarpio's Private Pool</h1></div></div>
   <nav class="tabs">
     <button class="tab-btn active" type="button" data-tab="book" onclick="switchTab('book')">New Booking</button>
-    <button class="tab-btn" type="button" data-tab="avail" onclick="switchTab('avail')">Availability</button>
     <button class="tab-btn" type="button" data-tab="date" onclick="switchTab('date')">Date Management</button>
+    <button class="tab-btn" type="button" data-tab="avail" onclick="switchTab('avail')">Availability</button>
   </nav>
 </header>
 
@@ -118,8 +118,32 @@
     </div>
   </section>
 
-  <section class="panel" id="panel-avail">
+  <section class="panel" id="panel-date">
     <h2 class="section-title">Module 2</h2>
+    <div class="block">
+      <h2 class="section-title">Search date</h2>
+      <div class="form-card">
+        <div class="field-grid"><div class="field"><label for="sDate">Date</label><input type="date" id="sDate"></div></div>
+        <div class="btn-row"><button type="button" class="primary" onclick="searchDate()">Search date</button></div>
+        <div id="searchResult" style="margin-top:14px"></div>
+      </div>
+    </div>
+    <div class="block">
+      <h2 class="section-title">Calendar</h2>
+      <div class="cal-card">
+        <div class="cal-nav">
+          <button type="button" onclick="navMonth('date',-1)">&#8249;</button>
+          <span id="date-label"></span>
+          <button type="button" onclick="navMonth('date',1)">&#8250;</button>
+        </div>
+        <table class="calendar"><thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody id="date-body"></tbody></table>
+        <div class="legend"><span class="swatch"></span> Reserved &nbsp; <span class="swatch ev"></span> Pool event</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-avail">
+    <h2 class="section-title">Module 3</h2>
     <div class="block">
       <h2 class="section-title">Pool events</h2>
       <div class="form-card">
@@ -146,30 +170,6 @@
         </div>
         <table class="calendar"><thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody id="avail-body"></tbody></table>
         <div class="legend"><span class="swatch"></span> Reserved &nbsp; <span class="swatch ev"></span> Pool event (unavailable)</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="panel" id="panel-date">
-    <h2 class="section-title">Module 3</h2>
-    <div class="block">
-      <h2 class="section-title">Search date</h2>
-      <div class="form-card">
-        <div class="field-grid"><div class="field"><label for="sDate">Date</label><input type="date" id="sDate"></div></div>
-        <div class="btn-row"><button type="button" class="primary" onclick="searchDate()">Search date</button></div>
-        <div id="searchResult" style="margin-top:14px"></div>
-      </div>
-    </div>
-    <div class="block">
-      <h2 class="section-title">Calendar</h2>
-      <div class="cal-card">
-        <div class="cal-nav">
-          <button type="button" onclick="navMonth('date',-1)">&#8249;</button>
-          <span id="date-label"></span>
-          <button type="button" onclick="navMonth('date',1)">&#8250;</button>
-        </div>
-        <table class="calendar"><thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody id="date-body"></tbody></table>
-        <div class="legend"><span class="swatch"></span> Reserved &nbsp; <span class="swatch ev"></span> Pool event</div>
       </div>
     </div>
   </section>
