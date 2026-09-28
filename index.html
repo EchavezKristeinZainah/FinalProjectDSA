@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Policarpio's Private Pool</title>
+<style>
+  :root{
+    --leaf:#4c9a7d; --leaf-light:#dbf0e6; --leaf-dark:#2f6b52;
+    --sky:#3f7fb0; --sky-light:#dbeaf5; --sky-dark:#285f85;
+    --ink:#1e2b28; --paper:#f5faf8; --line:#cfe3da;
+    --danger:#c65b5b; --danger-light:#fbe4e4;
+    box-sizing:border-box;
+  }
+  *{box-sizing:inherit;}
+  html,body{margin:0;height:100%;background:var(--paper);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;color:var(--ink);}
+  header.topnav{position:sticky;top:0;z-index:20;background:linear-gradient(90deg,var(--sky-dark),var(--leaf-dark));padding:env(safe-area-inset-top,0px) 0 0 0;box-shadow:0 2px 10px rgba(0,0,0,.12);}
+  .nav-inner{max-width:1000px;margin:0 auto;padding:14px 20px 0 20px;display:flex;align-items:center;gap:10px;}
+  .brand{display:flex;align-items:center;gap:8px;}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--leaf-light);display:inline-block;}
+  .brand h1{color:#fff;font-size:1.8rem;font-weight:700;margin:0;letter-spacing:.3px;}
+  .tabs{display:flex;gap:4px;padding:10px 20px 0 20px;max-width:1000px;margin:0 auto;overflow-x:auto;}
+  .tab-btn{appearance:none;border:none;background:rgba(255,255,255,.12);color:#eaf6f0;padding:10px 18px;font-size:.92rem;font-weight:600;border-radius:10px 10px 0 0;cursor:pointer;white-space:nowrap;transition:background .15s ease,color .15s ease;}
+  .tab-btn:hover{background:rgba(255,255,255,.22);}
+  .tab-btn.active{background:var(--paper);color:var(--sky-dark);}
+  main{max-width:1000px;margin:0 auto;padding:28px 20px 60px 20px;}
+  .panel{display:none;} .panel.active{display:block;}
+  h2.section-title{font-size:1.1rem;font-weight:700;color:var(--sky-dark);margin:0 0 18px 0;border-left:4px solid var(--leaf);padding-left:10px;}
+  .block{margin-bottom:26px;}
+  .form-card,.cal-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 1px 3px rgba(30,60,50,.06);}
+  .field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+  .field label{display:block;font-size:.8rem;font-weight:600;color:var(--sky-dark);margin-bottom:5px;}
+  .field input,.field select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:.95rem;background:var(--paper);color:var(--ink);}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--leaf);background:#fff;}
+  .error-msg{color:var(--danger);font-size:.85rem;font-weight:600;min-height:1.2em;margin:14px 0 0 0;}
+  .btn-row{display:flex;gap:10px;margin-top:14px;}
+  button.primary,button.secondary,button.danger-btn{border:none;border-radius:8px;padding:11px 20px;font-size:.9rem;font-weight:700;cursor:pointer;transition:transform .1s ease;}
+  button.primary{background:var(--leaf);color:#fff;} button.primary:hover{background:var(--leaf-dark);}
+  button.secondary{background:var(--sky-light);color:var(--sky-dark);} button.secondary:hover{background:#c9e0ef;}
+  button.danger-btn{background:var(--danger-light);color:var(--danger);padding:6px 12px;font-size:.8rem;} button.danger-btn:hover{background:#f6cfcf;}
+  button:active{transform:scale(.97);}
+  .muted{color:#7c8f89;font-style:italic;font-size:.9rem;}
+  .result-ok{border-left:4px solid var(--leaf);background:var(--leaf-light);padding:12px 14px;border-radius:8px;font-size:.92rem;line-height:1.6;}
+  .result-bad{border-left:4px solid var(--danger);background:var(--danger-light);color:var(--danger);padding:12px 14px;border-radius:8px;font-weight:600;font-size:.92rem;}
+  .result-ev{border-left:4px solid var(--sky);background:var(--sky-light);color:var(--sky-dark);padding:12px 14px;border-radius:8px;font-weight:600;font-size:.92rem;}
+  ul.rows{list-style:none;margin:14px 0 0 0;padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  ul.rows li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:.9rem;}
+  ul.rows li:last-child{border-bottom:none;}
+
+  .cal-nav{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:16px;}
+  .cal-nav button{border:none;background:var(--sky-light);color:var(--sky-dark);width:34px;height:34px;border-radius:50%;font-size:1rem;cursor:pointer;font-weight:700;}
+  .cal-nav button:hover{background:#c9e0ef;}
+  .cal-nav span{font-weight:700;font-size:1.05rem;min-width:160px;text-align:center;}
+  table.calendar{width:100%;border-collapse:separate;border-spacing:6px;}
+  table.calendar th{font-size:.75rem;color:var(--sky-dark);font-weight:700;padding-bottom:4px;}
+  table.calendar td{height:62px;width:14.28%;vertical-align:top;padding:6px;border-radius:8px;background:var(--paper);border:1px solid var(--line);font-size:.85rem;}
+  table.calendar td.booked{background:var(--danger-light);border-color:#eac3c3;font-weight:700;}
+  table.calendar td.event{background:var(--sky-light);border-color:#b7d3e6;font-weight:700;}
+  table.calendar td.clickable{cursor:pointer;}
+  table.calendar td.blank{background:transparent;border:none;}
+  table.calendar td.highlighted{outline:3px solid var(--sky);outline-offset:-3px;}
+  .booked-tag,.event-tag{display:block;font-size:.68rem;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .booked-tag{color:var(--danger);} .event-tag{color:var(--sky-dark);}
+  .legend{margin-top:14px;display:flex;align-items:center;gap:8px;font-size:.85rem;flex-wrap:wrap;}
+  .swatch{width:14px;height:14px;border-radius:4px;background:var(--danger-light);border:1px solid #eac3c3;display:inline-block;}
+  .swatch.ev{background:var(--sky-light);border-color:#b7d3e6;}
+  @media (max-width:560px){
+    .field-grid{grid-template-columns:1fr;}
+    table.calendar td{height:48px;font-size:.75rem;}
+    .cal-nav span{min-width:120px;font-size:.92rem;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="nav-inner"><div class="brand"><span class="dot"></span><h1>Policarpio's Private Pool</h1></div></div>
+  <nav class="tabs">
+    <button class="tab-btn active" type="button" data-tab="book" onclick="switchTab('book')">New Booking</button>
+    <button class="tab-btn" type="button" data-tab="avail" onclick="switchTab('avail')">Availability</button>
+    <button class="tab-btn" type="button" data-tab="date" onclick="switchTab('date')">Date Management</button>
+  </nav>
+</header>
+
+<main>
+
+  <section class="panel active" id="panel-book">
+    <h2 class="section-title">Module 1</h2>
+    <div class="block">
+      <h2 class="section-title">Client information</h2>
+      <div class="form-card">
+        <div class="field-grid">
+          <div class="field"><label for="name">Name</label><input type="text" id="name" placeholder="Full name"></div>
+          <div class="field"><label for="mobile">Mobile number</label><input type="tel" id="mobile" placeholder="09xx xxx xxxx"></div>
+          <div class="field"><label for="guestCount">Number of guests</label><input type="number" id="guestCount" min="1" max="100" placeholder="1-100"></div>
+          <div class="field"><label for="eventType">Event type (optional)</label><input type="text" id="eventType" placeholder="e.g. Birthday, Reunion, Party pack"></div>
+          <div class="field"><label for="date">Date</label><input type="date" id="date"></div>
+          <div class="field"><label for="until">Until (optional)</label><input type="date" id="until"></div>
+          <div class="field">
+            <label for="paymentStatus">Payment status</label>
+            <select id="paymentStatus">
+              <option value="">Select payment status</option>
+              <option value="Paid">Paid</option>
+              <option value="Downpayment">Downpayment</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="primary" onclick="submitBooking()">Add booking</button>
+          <button type="button" class="secondary" onclick="clearBookingForm()">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div class="block"><div class="form-card" id="output"><span class="muted">Your booking confirmation will appear here.</span></div></div>
+    <div class="block">
+      <h2 class="section-title">All bookings</h2>
+      <div class="form-card"><div id="bookingList"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-avail">
+    <h2 class="section-title">Module 2</h2>
+    <div class="block">
+      <h2 class="section-title">Pool events</h2>
+      <div class="form-card">
+        <div class="field-grid">
+          <div class="field"><label for="evTitle">Pool event</label><input type="text" id="evTitle" placeholder="e.g. Cleaning, Maintenance fix"></div>
+          <div class="field"><label for="evDate">Date</label><input type="date" id="evDate"></div>
+          <div class="field"><label for="evUntil">Until (optional)</label><input type="date" id="evUntil"></div>
+        </div>
+        <p class="error-msg" id="errorMessage"></p>
+        <div class="btn-row">
+          <button type="button" class="primary" onclick="addEvent()">Add to calendar</button>
+          <button type="button" class="secondary" onclick="clearEventForm()">Clear</button>
+        </div>
+        <ul class="rows" id="eventList"></ul>
+      </div>
+    </div>
+    <div class="block">
+      <h2 class="section-title">Reservation calendar</h2>
+      <div class="cal-card">
+        <div class="cal-nav">
+          <button type="button" onclick="navMonth('avail',-1)">&#8249;</button>
+          <span id="avail-label"></span>
+          <button type="button" onclick="navMonth('avail',1)">&#8250;</button>
+        </div>
+        <table class="calendar"><thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody id="avail-body"></tbody></table>
+        <div class="legend"><span class="swatch"></span> Reserved &nbsp; <span class="swatch ev"></span> Pool event (unavailable)</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-date">
+    <h2 class="section-title">Module 3</h2>
+    <div class="block">
+      <h2 class="section-title">Search date</h2>
+      <div class="form-card">
+        <div class="field-grid"><div class="field"><label for="sDate">Date</label><input type="date" id="sDate"></div></div>
+        <div class="btn-row"><button type="button" class="primary" onclick="searchDate()">Search date</button></div>
+        <div id="searchResult" style="margin-top:14px"></div>
+      </div>
+    </div>
+    <div class="block">
+      <h2 class="section-title">Calendar</h2>
+      <div class="cal-card">
+        <div class="cal-nav">
+          <button type="button" onclick="navMonth('date',-1)">&#8249;</button>
+          <span id="date-label"></span>
+          <button type="button" onclick="navMonth('date',1)">&#8250;</button>
+        </div>
+        <table class="calendar"><thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody id="date-body"></tbody></table>
+        <div class="legend"><span class="swatch"></span> Reserved &nbsp; <span class="swatch ev"></span> Pool event</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+
+const STORAGE_KEY = "policarpio_pool_data_v1";
+const BACKUP_KEY = "policarpio_pool_data_v1_backup";
+const DRAFT_KEY = "policarpio_pool_drafts_v1";
+let bookings = [];
+let events = [];
+let bookingCount = 0;
+let eventCount = 0;
+let storageWarned = false;
+
+function storageWrite(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return localStorage.getItem(key) === value;
+  } catch (e) { return false; }
+}
+function storageRead(key) {
+  try { return localStorage.getItem(key); } catch (e) { return null; }
+}
+
+function saveData() {
+  const json = JSON.stringify({ bookings, events, bookingCount, eventCount });
+  const prev = storageRead(STORAGE_KEY);
+  if (prev && prev !== json) storageWrite(BACKUP_KEY, prev);
+  if (!storageWrite(STORAGE_KEY, json) && !storageWarned) {
+    storageWarned = true;
+    alert("Your browser is blocking storage, so data will NOT be kept after you close this page. Try a normal (non-private) window or another browser.");
+  }
+}
+
+function applyStored(raw) {
+  if (!raw) return false;
+  try {
+    const d = JSON.parse(raw);
+    if (!d || typeof d !== "object") return false;
+    bookings = sanitizeList(d.bookings, ["ref", "name", "mobile"]);
+    events = sanitizeList(d.events, ["title"]);
+    const maxRef = bookings.reduce((m, b) => Math.max(m, parseInt(String(b.ref).replace(/\D/g, ""), 10) || 0), 0);
+    const maxId = events.reduce((m, e) => Math.max(m, Number(e.id) || 0), 0);
+    bookingCount = Math.max(Number(d.bookingCount) || 0, maxRef);
+    eventCount = Math.max(Number(d.eventCount) || 0, maxId);
+    return true;
+  } catch (e) { return false; }
+}
+function loadData() {
+  if (applyStored(storageRead(STORAGE_KEY))) return;
+  if (applyStored(storageRead(BACKUP_KEY))) return;
+  bookings = []; events = []; bookingCount = 0; eventCount = 0;
+}
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+function sanitizeList(arr, textFields) {
+  if (!Array.isArray(arr)) return [];
+  const ok = arr.filter(x => x && typeof x === "object" && DATE_RE.test(x.date) &&
+    (!x.until || (DATE_RE.test(x.until) && x.until >= x.date)) &&
+    textFields.every(f => typeof x[f] === "string" || typeof x[f] === "number"));
+  ok.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  const out = [];
+  ok.forEach(x => {
+    const prev = out[out.length - 1];
+    if (!prev || x.date > (prev.until || prev.date)) out.push(x);
+  });
+  return out;
+}
+
+const DRAFT_FIELDS = ["name", "mobile", "guestCount", "eventType", "date", "until", "paymentStatus",
+                      "evTitle", "evDate", "evUntil", "sDate"];
+let activeTab = "book";
+function saveDrafts() {
+  const d = { tab: activeTab };
+  DRAFT_FIELDS.forEach(id => { d[id] = document.getElementById(id).value; });
+  storageWrite(DRAFT_KEY, JSON.stringify(d));
+}
+function restoreDrafts() {
+  try {
+    const d = JSON.parse(storageRead(DRAFT_KEY) || "null");
+    if (!d) return;
+    DRAFT_FIELDS.forEach(id => { if (typeof d[id] === "string") document.getElementById(id).value = d[id]; });
+    document.getElementById("until").min = document.getElementById("date").value || getTodayString();
+    document.getElementById("until").max = document.getElementById("date").value ? maxUntil(document.getElementById("date").value) : "";
+    document.getElementById("evUntil").min = document.getElementById("evDate").value || getTodayString();
+    if (["book", "avail", "date"].includes(d.tab)) switchTab(d.tab);
+  } catch (e) {  }
+}
+document.addEventListener("input", saveDrafts);
+document.addEventListener("change", saveDrafts);
+
+function saveAll() { saveData(); saveDrafts(); }
+window.addEventListener("pagehide", saveAll);
+window.addEventListener("beforeunload", saveAll);
+document.addEventListener("freeze", saveAll);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveAll(); });
+
+window.addEventListener("storage", (e) => {
+  if (e.key !== STORAGE_KEY) return;
+  loadData();
+  refreshAll();
+});
+
+function esc(s) { const d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; }
+function endOf(x) { return x.until || x.date; }
+function getTodayString() {
+  const n = new Date();
+  return n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0");
+}
+function isAdvanceBooking(dateStr) { return dateStr.slice(0, 7) > getTodayString().slice(0, 7); }
+function maxUntil(dateStr) { return addDays(dateStr, isAdvanceBooking(dateStr) ? 30 : 1); }
+function addDays(dateStr, n) {
+  const p = dateStr.split("-");
+  const d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) + n);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function insertPos(list, target) {
+  let lo = 0, hi = list.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (list[mid].date < target) lo = mid + 1; else hi = mid; }
+  return lo;
+}
+function upperBound(list, date) {
+  let lo = 0, hi = list.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (list[mid].date <= date) lo = mid + 1; else hi = mid; }
+  return lo;
+}
+function findConflict(list, date, rangeEnd) {
+  const pos = insertPos(list, date);
+  if (pos > 0) { const a = list[pos - 1]; if (date <= endOf(a) && rangeEnd >= a.date) return a; }
+  for (let i = pos; i < list.length && list[i].date <= rangeEnd; i++) {
+    const a = list[i]; if (date <= endOf(a) && rangeEnd >= a.date) return a;
+  }
+  return null;
+}
+function findOnDate(list, date) {
+  const i = upperBound(list, date) - 1;
+  return (i >= 0 && date <= endOf(list[i])) ? list[i] : null;
+}
+function insertSorted(list, item) { list.splice(insertPos(list, item.date), 0, item); }
+function rangeText(x) { return esc(x.date) + (x.until ? " &rarr; " + esc(x.until) : ""); }
+
+function switchTab(tab) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("panel-" + tab).classList.add("active");
+  document.querySelector('.tab-btn[data-tab="' + tab + '"]').classList.add("active");
+  activeTab = tab;
+  saveDrafts();
+  refreshAll();
+}
+
+function processBooking(input) {
+  const { name, mobile, guestCount, eventType, date, until, paymentStatus } = input;
+  const fail = (msg) => ({ ok: false, error: msg });
+  if (!name || !mobile || !guestCount || !date || !paymentStatus) return fail("Please complete all the required information.");
+  if (!/^\d+$/.test(String(guestCount))) return fail("Number of guests must be a whole number.");
+  const guests = Number(guestCount);
+  if (guests < 1 || guests > 100) return fail("Number of guests must be between 1 and 100.");
+  if (!/^\d+$/.test(mobile)) return fail("Mobile number must contain numbers only.");
+  if (!/^09\d{9}$/.test(mobile)) return fail("Mobile number must be 11 digits and start with 09.");
+  if (date < getTodayString()) return fail("Booking date cannot be in the past.");
+  if (until && until < date) return fail("The 'Until' date cannot be before the start date.");
+  if (until && until > maxUntil(date)) {
+    return fail(isAdvanceBooking(date)
+      ? "An advance booking can cover at most a whole month: the 'Until' date can be at most 30 days after the start date."
+      : "A booking can only last up to 24 hours: the 'Until' date can be at most 1 day after the start date. (A whole month is only available for advance bookings in a later month.)");
+  }
+
+  const rangeEnd = until || date;
+  const ev = findConflict(events, date, rangeEnd);
+  if (ev) return fail("Those dates are unavailable: pool event \"" + ev.title + "\" (" + ev.date + (ev.until ? " to " + ev.until : "") + ").");
+  const clash = findConflict(bookings, date, rangeEnd);
+  if (clash) return fail("Those dates overlap with an existing booking for " + clash.name + ".");
+
+  bookingCount++;
+  const booking = { ref: "PP-" + String(bookingCount).padStart(4, "0"), name, mobile, guestCount: guests, eventType, date, until, paymentStatus };
+  insertSorted(bookings, booking);
+  return { ok: true, booking };
+}
+
+function submitBooking() {
+  const val = (id) => document.getElementById(id).value.trim();
+  const result = processBooking({
+    name: val("name"), mobile: val("mobile"), guestCount: val("guestCount"),
+    eventType: val("eventType"), date: val("date"), until: val("until"), paymentStatus: val("paymentStatus")
+  });
+  const out = document.getElementById("output");
+  if (!result.ok) { out.innerHTML = '<div class="result-bad">' + esc(result.error) + "</div>"; return; }
+  const b = result.booking;
+  out.innerHTML = '<div class="result-ok"><b>Booking confirmed &mdash; ' + esc(b.ref) + "</b><br>" +
+    "Name: " + esc(b.name) + "<br>Mobile: " + esc(b.mobile) + "<br>Guests: " + b.guestCount + "<br>" +
+    "Event type: " + (b.eventType ? esc(b.eventType) : "&mdash;") + "<br>" +
+    "Date: " + rangeText(b) + "<br>Payment: " + esc(b.paymentStatus) + "</div>";
+  clearBookingForm();
+  saveData();
+  refreshAll();
+}
+
+function cancelBooking(ref) {
+  if (!confirm("Cancel booking " + ref + "?")) return;
+  bookings = bookings.filter(b => b.ref !== ref);
+  saveData();
+  refreshAll();
+}
+
+function clearBookingForm() {
+  ["name", "mobile", "guestCount", "eventType", "date", "until", "paymentStatus"].forEach(id => { document.getElementById(id).value = ""; });
+  saveDrafts();
+}
+
+function displayBookings() {
+  const box = document.getElementById("bookingList");
+  if (bookings.length === 0) { box.innerHTML = '<span class="muted">No bookings yet.</span>'; return; }
+  box.innerHTML = '<ul class="rows" style="margin:0"></ul>';
+  const ul = box.firstChild;
+  bookings.forEach(b => {
+    const li = document.createElement("li");
+    const t = document.createElement("span");
+    t.innerHTML = "<b>" + esc(b.ref) + "</b> " + esc(b.name) + " &mdash; " + rangeText(b) + " &middot; " + b.guestCount + " guests &middot; " + esc(b.paymentStatus);
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "danger-btn"; btn.textContent = "Cancel";
+    btn.addEventListener("click", () => cancelBooking(b.ref));
+    li.appendChild(t); li.appendChild(btn); ul.appendChild(li);
+  });
+}
+
+document.getElementById("mobile").addEventListener("input", function () { this.value = this.value.replace(/\D/g, "").slice(0, 11); });
+document.getElementById("date").min = getTodayString();
+document.getElementById("until").min = getTodayString();
+document.getElementById("date").addEventListener("change", function () {
+  document.getElementById("until").min = this.value || getTodayString();
+  document.getElementById("until").max = this.value ? maxUntil(this.value) : "";
+});
+
+function addEvent() {
+  const val = (id) => document.getElementById(id).value.trim();
+  const title = val("evTitle"), date = val("evDate"), until = val("evUntil");
+  const msg = document.getElementById("errorMessage");
+  msg.innerHTML = "";
+  if (title === "" || date === "") { msg.innerHTML = "Please enter the pool event and the date."; return; }
+  if (date < getTodayString()) { msg.innerHTML = "The event date cannot be in the past."; return; }
+  if (until !== "" && until < date) { msg.innerHTML = "The 'Until' date cannot be before the start date."; return; }
+  const end = until || date;
+
+  const evClash = findConflict(events, date, end);
+  if (evClash) { msg.innerHTML = "Those dates overlap with the pool event \"" + esc(evClash.title) + "\" (" + rangeText(evClash) + ")."; return; }
+  const resClash = findConflict(bookings, date, end);
+  if (resClash) { msg.innerHTML = "Those dates overlap with the booking of " + esc(resClash.name) + " (" + esc(resClash.ref) + ")."; return; }
+
+  eventCount++;
+  insertSorted(events, { id: eventCount, title, date, until });
+  clearEventForm();
+  saveData();
+  refreshAll();
+}
+
+function removeEvent(id) {
+  if (!confirm("Remove this pool event?")) return;
+  events = events.filter(e => e.id !== id);
+  saveData();
+  refreshAll();
+}
+
+function clearEventForm() {
+  ["evTitle", "evDate", "evUntil"].forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("errorMessage").innerHTML = "";
+  saveDrafts();
+}
+
+function displayEvents() {
+  const list = document.getElementById("eventList");
+  list.innerHTML = "";
+  list.style.display = events.length ? "block" : "none";
+  events.forEach(e => {
+    const li = document.createElement("li");
+    const t = document.createElement("span");
+    t.innerHTML = "<b>" + esc(e.title) + "</b> &mdash; " + rangeText(e);
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "danger-btn"; btn.textContent = "Remove";
+    btn.addEventListener("click", () => removeEvent(e.id));
+    li.appendChild(t); li.appendChild(btn); list.appendChild(li);
+  });
+}
+document.getElementById("evDate").min = getTodayString();
+document.getElementById("evUntil").min = getTodayString();
+document.getElementById("evDate").addEventListener("change", function () {
+  document.getElementById("evUntil").min = this.value || getTodayString();
+});
+
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const now = new Date();
+const cal = {
+  avail: { m: now.getMonth(), y: now.getFullYear(), hl: null, clickable: false },
+  date:  { m: now.getMonth(), y: now.getFullYear(), hl: null, clickable: true }
+};
+
+function navMonth(key, delta) {
+  const c = cal[key];
+  c.m += delta;
+  if (c.m < 0) { c.m = 11; c.y--; } else if (c.m > 11) { c.m = 0; c.y++; }
+  renderCalendar(key);
+}
+
+function renderCalendar(key) {
+  const c = cal[key];
+  const body = document.getElementById(key + "-body");
+  body.innerHTML = "";
+  document.getElementById(key + "-label").textContent = monthNames[c.m] + " " + c.y;
+  const firstDay = new Date(c.y, c.m, 1).getDay();
+  const days = new Date(c.y, c.m + 1, 0).getDate();
+  const blank = () => { const td = document.createElement("td"); td.className = "blank"; return td; };
+  let row = document.createElement("tr");
+  for (let i = 0; i < firstDay; i++) row.appendChild(blank());
+
+  for (let day = 1; day <= days; day++) {
+    const cell = document.createElement("td");
+    const d = c.y + "-" + String(c.m + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+    const ev = findOnDate(events, d);
+    const bk = ev ? null : findOnDate(bookings, d);
+    cell.textContent = day;
+    if (ev) {
+      cell.className = "event";
+      cell.insertAdjacentHTML("beforeend", '<span class="event-tag">' + esc(ev.title) + "</span>");
+    } else if (bk) {
+      cell.className = "booked";
+      cell.insertAdjacentHTML("beforeend", '<span class="booked-tag">RESERVED</span>');
+    }
+    if ((ev || bk) && c.clickable) {
+      cell.classList.add("clickable");
+      cell.addEventListener("click", () => { document.getElementById("sDate").value = d; searchDate(); });
+    }
+    if (c.hl === d) cell.classList.add("highlighted");
+    row.appendChild(cell);
+    if ((firstDay + day) % 7 === 0) { body.appendChild(row); row = document.createElement("tr"); }
+  }
+  if (row.children.length > 0) {
+    while (row.children.length < 7) row.appendChild(blank());
+    body.appendChild(row);
+  }
+}
+
+function showSearchResult(date) {
+  const box = document.getElementById("searchResult");
+  const ev = findOnDate(events, date);
+  const bk = findOnDate(bookings, date);
+  if (ev) {
+    box.innerHTML = '<div class="result-ev">' + esc(date) + " has a pool event: <b>" + esc(ev.title) + "</b> (" + rangeText(ev) + ").</div>";
+  } else if (bk) {
+    box.innerHTML = '<div class="result-bad">' + esc(date) + " is reserved: <b>" + esc(bk.name) + "</b> (" + esc(bk.ref) + ", " + rangeText(bk) + ", " + esc(bk.paymentStatus) + ").</div>";
+  } else {
+    box.innerHTML = '<div class="result-ok">' + esc(date) + " is available &mdash; no event or booking.</div>";
+  }
+}
+
+function searchDate() {
+  const date = document.getElementById("sDate").value;
+  const box = document.getElementById("searchResult");
+  const c = cal.date;
+  if (date === "") {
+    box.innerHTML = '<div class="result-bad">Please choose a date to search.</div>';
+    c.hl = null; renderCalendar("date"); return;
+  }
+  const p = date.split("-");
+  c.y = parseInt(p[0], 10); c.m = parseInt(p[1], 10) - 1; c.hl = date;
+  renderCalendar("date");
+  showSearchResult(date);
+}
+
+function refreshAll() {
+  displayBookings();
+  displayEvents();
+  renderCalendar("avail");
+  renderCalendar("date");
+  if (cal.date.hl) showSearchResult(cal.date.hl);
+}
+
+loadData();
+refreshAll();
+restoreDrafts();
+</script>
+</body>
+</html>
